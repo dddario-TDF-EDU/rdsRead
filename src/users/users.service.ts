@@ -5,6 +5,38 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 
+
+// Import AWS SDK v3
+const { DynamoDBClient, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+
+// Set the AWS Region
+const REGION = "us-east-1"; // replace with your desired region
+
+// Create an Amazon DynamoDB service client object
+const ddbClient = new DynamoDBClient({ region: REGION });
+
+// Set the parameters
+const params = {
+  TableName: 'miTablaEjemplo',
+  Key: {
+    'Artista': { S: 'YourArtistValue' }, // replace with your artist value
+    'Cancion': { S: 'YourSongValue' } // replace with your song value
+  }
+};
+
+const run = async () => {
+  try {
+    const data = await ddbClient.send(new GetItemCommand(params));
+    console.log("Success", data.Item);
+  } catch (err) {
+    console.log("Error", err);
+  }
+};
+
+
+
+
+
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(User)
@@ -19,6 +51,7 @@ export class UsersService {
 
   async findAll() {
     const allUsers = await this.userRepository.find();
+    run();
     return allUsers;
   }
 
